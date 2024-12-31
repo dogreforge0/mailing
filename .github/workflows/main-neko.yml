@@ -25,7 +25,9 @@ jobs:
         sudo apt-get install -y \
           x11-xserver-utils \
           xvfb \
-          x11-apps
+          x11-apps \
+          wget \
+          curl
 
     - name: Run Xvfb Server
       run: |
@@ -37,9 +39,9 @@ jobs:
         # Set DISPLAY to use the virtual X server
         export DISPLAY=:99
 
-        # Run Firefox in headless mode with Xvfb
+        # Run Firefox in headless mode with Xvfb, disable GPU hardware acceleration
         docker run --rm -v $(pwd)/output:/output selenium/standalone-firefox:latest \
-          bash -c "firefox --headless --screenshot --window-size=1280x1024 --url https://mail.google.com --output /output/screenshot.png"
+          bash -c "firefox --headless --no-remote --screenshot --window-size=1280x1024 --url https://mail.google.com --output /output/screenshot.png --preferences network.websocket.enabled=false"
 
     - name: Upload Screenshot
       uses: actions/upload-artifact@v3
