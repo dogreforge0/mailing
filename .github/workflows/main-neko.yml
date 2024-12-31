@@ -34,17 +34,29 @@ jobs:
         # Start a virtual X server with DISPLAY=:99
         Xvfb :99 -screen 0 1280x1024x24 &
 
-    - name: Run Neko Browser to Take Screenshot
+    - name: Create a Custom Firefox Profile with Disabled GPU
       run: |
         # Set DISPLAY to use the virtual X server
         export DISPLAY=:99
 
-        # Run Firefox in headless mode with Xvfb, disable GPU hardware acceleration
-        docker run --rm -v $(pwd)/output:/output selenium/standalone-firefox:latest \
-          bash -c "echo 'user_pref(\"gfx.webrender.enabled\", false);' >> /root/.mozilla/firefox/*default*/prefs.js && \
-              echo 'user_pref(\"layers.acceleration.disabled\", true);' >> /root/.mozilla/firefox/*default*/prefs.js && \
-              firefox --headless --no-remote --screenshot --window-size=1280x1024 --url https://mail.google.com --output /output/screenshot.png" 
-              
+        # Create a custom Firefox profile directory
+        mkdir -p /tmp/firefox-profile
+
+        # Create a custom prefs.js file with hardware acceleration disabled
+        echo 'user_pref("gfx.webrender.enabled", false);' > /tmp/firefox-profile/prefs.js
+        echo 'user_pref("layers.acceleration.disabled", true);' >> /tmp/firefox-profile/prefs.js
+        echo 'user_pref("media.hardware-video-decoding.enabled", false);' >> /tmp/firefox-profile/prefs.js
+
+    - name: Run Firefox to Take Screenshot with Custom Profile
+      run: |
+        # Set DISPLAY to use the virtual X server
+        export DISPLAY=:99
+
+        # Run Firefox with the custom profile (no GPU, hardware acceleration disabled)
+        docker run --rm -v $(pwd)/output:/output -v /tmp/firefox-profile:/root/.mozilla/firefox/profiles/custom \
+          selenium/standalone-firefox:latest \
+          bash -c "firefox --headless --no-remote --screenshot --window-size=1280x1024 --url https://mail.google.com --output /output/screenshot.png -P custom"
+
     - name: Upload Screenshot
       uses: actions/upload-artifact@v3
       with:
