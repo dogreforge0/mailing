@@ -41,8 +41,10 @@ jobs:
 
         # Run Firefox in headless mode with Xvfb, disable GPU hardware acceleration
         docker run --rm -v $(pwd)/output:/output selenium/standalone-firefox:latest \
-          bash -c "firefox --headless --no-remote --screenshot --window-size=1280x1024 --url https://mail.google.com --output /output/screenshot.png --preferences network.websocket.enabled=false"
-
+          bash -c "echo 'user_pref(\"gfx.webrender.enabled\", false);' >> /root/.mozilla/firefox/*default*/prefs.js && \
+              echo 'user_pref(\"layers.acceleration.disabled\", true);' >> /root/.mozilla/firefox/*default*/prefs.js && \
+              firefox --headless --no-remote --screenshot --window-size=1280x1024 --url https://mail.google.com --output /output/screenshot.png"
+              
     - name: Upload Screenshot
       uses: actions/upload-artifact@v3
       with:
