@@ -1,0 +1,37 @@
+name: Run Neko Browser to Take Screenshot of Gmail
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  neko_screenshot:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build Docker image
+      run: |
+        docker build -t neko-image .
+
+    - name: Run Neko Browser to Take Screenshot
+      run: |
+        # Run the Neko container, set DISPLAY to an X virtual framebuffer for GUI applications
+        docker run --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix neko-image \
+          bash -c "neko https://mail.google.com && sleep 5 && xwd -root -out screenshot.xwd && convert screenshot.xwd screenshot.png"
+        
+    - name: Upload Screenshot
+      uses: actions/upload-artifact@v3
+      with:
+        name: screenshot
+        path: screenshot.png
+
