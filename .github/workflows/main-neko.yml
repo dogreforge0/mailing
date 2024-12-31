@@ -26,8 +26,8 @@ jobs:
     - name: Run Neko Browser to Take Screenshot
       run: |
         # Run the Neko container, set DISPLAY to an X virtual framebuffer for GUI applications
-        docker run --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix neko-image \
-          bash -c "apt-get update && apt-get install -y neko && neko https://mail.google.com && sleep 5 && xwd -root -out screenshot.xwd && convert screenshot.xwd screenshot.png"
+        docker run --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix firefox-image \
+          bash -c "apt-get update && apt-get install -y firefox && firefox --headless --screenshot --window-size=1280x1024 --url https://mail.google.com --output screenshot.png"
         
     - name: Upload Screenshot
       uses: actions/upload-artifact@v3
