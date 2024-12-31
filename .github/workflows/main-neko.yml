@@ -3,41 +3,45 @@ name: Browser Automation with Puppeteer
 on:
   push:
     branches:
-      - main   # Trigger on push to main branch
+      - main  # Trigger on push to main branch
   pull_request:
     branches:
-      - main   # Trigger on PR to main branch
+      - main  # Trigger on PR to main branch
 
 jobs:
   browser-test:
-    runs-on: ubuntu-latest  # Choose the OS for the action runner
+    runs-on: ubuntu-latest  # Use Ubuntu as the runner
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2  # Checkout the repository to the runner
+      uses: actions/checkout@v2  # Checkout your repository
 
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '16'  # Use the appropriate Node.js version
+        node-version: '20'  # Use the appropriate Node.js version
 
     - name: Install Puppeteer
       run: |
-        npm install puppeteer
+        npm install puppeteer  # Install Puppeteer for headless browser interaction
 
-    - name: Run Puppeteer script
+    - name: Run Puppeteer Script
       run: |
-        echo "const puppeteer = require('puppeteer');" > script.js
-        echo "puppeteer.launch({headless: true}).then(async browser => {" >> script.js
-        echo "  const page = await browser.newPage();" >> script.js
-        echo "  await page.goto('https://mail.google.com');" >> script.js
-        echo "  await page.screenshot({path: 'example.png'});" >> script.js
-        echo "  await browser.close();" >> script.js
-        echo "});" >> script.js
-        node script.js
+        echo "const puppeteer = require('puppeteer');" > puppeteer-script.js
+        echo "puppeteer.launch({ headless: true }).then(async browser => {" >> puppeteer-script.js
+        echo "  const page = await browser.newPage();" >> puppeteer-script.js
+        echo "  await page.goto('https://www.example.com');" >> puppeteer-script.js
+        echo "  await page.screenshot({ path: 'puppeteer-screenshot.png' });" >> puppeteer-script.js
+        echo "  await browser.close();" >> puppeteer-script.js
+        echo "});" >> puppeteer-script.js
+        node puppeteer-script.js
 
-    - name: Upload Screenshot
-      uses: actions/upload-artifact@v3
+    - name: Compress Screenshot into a Zip File
+      run: |
+        zip puppeteer-screenshot.zip puppeteer-screenshot.png  # Create a ZIP file
+
+    - name: Upload Screenshot as Artifact
+      uses: actions/upload-artifact@v3  # Use v3 for uploading
       with:
         name: screenshot
-        path: example.png  # Upload the screenshot taken by Puppeteer
+        path: puppeteer-screenshot.zip  # Upload the ZIP file instead of the image
