@@ -25,6 +25,9 @@ jobs:
 
     - name: Run Neko Browser to Take Screenshot
       run: |
+
+        xhost +local:docker
+        
         # Run the Neko container, set DISPLAY to an X virtual framebuffer for GUI applications
         docker run --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix selenium/standalone-firefox:latest \
           bash -c "firefox --headless --screenshot --window-size=1280x1024 --url https://mail.google.com --output screenshot.png"
